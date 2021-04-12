@@ -68,7 +68,6 @@ public class ItemController {
 
     @RequestMapping("/deleteItemById")
     public Result deleteItemById(@RequestParam(defaultValue = "0") Long itemId){
-
         try {
             itemServiceFeign.deleteItemById(itemId);
             return Result.ok();
@@ -76,7 +75,6 @@ public class ItemController {
             e.printStackTrace();
             return Result.error("删除失败");
         }
-
     }
 
 }
