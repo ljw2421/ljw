@@ -97,7 +97,7 @@ public class TbItem {
         this.status = status;
     }
 
-    public Date getCreated() {
+    public Date getCreated(Date date) {
         return created;
     }
 
