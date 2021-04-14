@@ -23,9 +23,6 @@ public class ItemService {
     private TbItemDescMapper tbItemDescMapper;
 
     @Autowired
-    private TbItemParamMapper tbItemParamMapper;
-
-    @Autowired
     private TbItemParamItemMapper tbItemParamItemMapper;
 
     @Autowired
