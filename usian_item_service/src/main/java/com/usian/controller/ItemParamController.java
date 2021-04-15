@@ -30,4 +30,13 @@ public class ItemParamController {
         return itemParamService.selectTbItemAllByPage(page,rows);
     }
 
+    @RequestMapping("insertItemParam")
+    public Integer insertItemParam(Long itemCatId, String paramData){
+        return itemParamService.insertItemParam(itemCatId,paramData);
+    }
+
+    @RequestMapping("deleteItemParamById")
+    public Integer deleteItemParamById(@RequestParam Long id){
+        return itemParamService.deleteItemParamById(id);
+    }
 }

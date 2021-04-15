@@ -40,5 +40,23 @@ public class ItemParamController {
         return Result.error("查无结果");
     }
 
+    @RequestMapping("insertItemParam")
+    public Result insertItemParam(Long itemCatId,String paramData){
+        Integer i = itemServiceFeign.insertItemParam(itemCatId,paramData);
+        if (i == 1){
+            return Result.ok();
+        }
+        return Result.error("添加失败，该类自己有规格模板");
+    }
+
+    @RequestMapping("deleteItemParamById")
+    public Result deleteItemParamById(@RequestParam Long id){
+        Integer i = itemServiceFeign.deleteItemParamById(id);
+        if (i == 1){
+            return Result.ok();
+        }
+        return Result.error("删除失败");
+    }
+
 
 }

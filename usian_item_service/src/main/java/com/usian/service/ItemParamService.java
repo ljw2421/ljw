@@ -11,6 +11,7 @@ import com.usian.utils.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -41,5 +42,28 @@ public class ItemParamService{
         pageResult.setTotalPage(Long.valueOf(pageInfo.getPages()));
         pageResult.setPageIndex(pageInfo.getPageNum());
         return pageResult;
+    }
+
+    public Integer insertItemParam(Long itemCatId, String paramData) {
+        //1、判断该类别的商品是否有规格模板
+        TbItemParamExample tbItemParamExample = new TbItemParamExample();
+        TbItemParamExample.Criteria criteria = tbItemParamExample.createCriteria();
+        criteria.andItemCatIdEqualTo(itemCatId);
+        List<TbItemParam> itemParamList = tbItemParamMapper.selectByExample(tbItemParamExample);
+        if(itemParamList.size()>0){
+            return 0;
+        }
+        //2、保存规格模板
+        Date date = new Date();
+        TbItemParam tbItemParam = new TbItemParam();
+        tbItemParam.setItemCatId(itemCatId);
+        tbItemParam.setParamData(paramData);
+        tbItemParam.setUpdated(date);
+        tbItemParam.setCreated(date);
+        return tbItemParamMapper.insertSelective(tbItemParam);
+    }
+
+    public Integer deleteItemParamById(Long id) {
+        return tbItemParamMapper.deleteByPrimaryKey(id);
     }
 }
