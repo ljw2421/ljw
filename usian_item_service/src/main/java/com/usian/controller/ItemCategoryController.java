@@ -4,6 +4,7 @@ import com.usian.pojo.TbItem;
 import com.usian.pojo.TbItemCat;
 import com.usian.service.ItemCategoryService;
 import com.usian.service.ItemService;
+import com.usian.utils.CatResult;
 import com.usian.utils.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,5 +24,10 @@ public class ItemCategoryController {
     public List<TbItemCat> selectItemCategoryByParentId(@RequestParam Long id){
         List<TbItemCat> list = itemCategoryService.selectItemCategoryByParentId(id);
         return list;
+    }
+
+    @RequestMapping("selectItemCategoryAll")
+    public CatResult selectItemCategoryAll(){
+        return itemCategoryService.selectItemCategoryAll();
     }
 }
