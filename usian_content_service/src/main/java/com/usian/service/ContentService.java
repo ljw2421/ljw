@@ -2,6 +2,7 @@ package com.usian.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.usian.config.RedisClient;
 import com.usian.mapper.TbContentMapper;
 import com.usian.pojo.TbContent;
 import com.usian.pojo.TbContentExample;
@@ -33,6 +34,15 @@ public class ContentService {
     @Value("${AD_WIDTHB}")
     private Integer AD_WIDTHB;
 
+    @Value("${PORTAL_AD_KEY}")
+    private String portal_ad_redis_key;
+
+    @Autowired
+    private RedisClient redisClient;
+
+//    @Autowired
+//    private RedisClient redisClient;
+
     @Autowired
     private TbContentMapper tbContentMapper;
 
@@ -48,6 +58,8 @@ public class ContentService {
     }
 
     public Integer deleteContentByIds(Long id) {
+        redisClient.hdel(portal_ad_redis_key,AD_CATEGORY_ID);
+//        redisClient.hdel(portal_ad_redis_key,AD_CATEGORY_ID.toString());
         return tbContentMapper.deleteByPrimaryKey(id);
     }
 
@@ -55,7 +67,9 @@ public class ContentService {
         Date date = new Date();
         tbContent.setCreated(date);
         tbContent.setUpdated(date);
-        return tbContentMapper.insertSelective(tbContent);
+        Integer num = tbContentMapper.insertSelective(tbContent);
+//        redisClient.hdel(portal_ad_redis_key,AD_CATEGORY_ID.toString());
+        return num;
     }
 
     public List<AdNode> selectFrontendContentByAD() {
@@ -75,7 +89,8 @@ public class ContentService {
             adNode.setWidthB(AD_WIDTHB);
             adNodeList.add(adNode);
         }
-
+        redisClient.hset(portal_ad_redis_key,AD_CATEGORY_ID.toString(),adNodeList);
+//        redisClient.hset(portal_ad_redis_key,AD_CATEGORY_ID.toString(),adNodeList);
         return adNodeList;
     }
 }

@@ -1,6 +1,8 @@
 package com.usian.controller;
 
 import com.usian.pojo.TbItem;
+import com.usian.pojo.TbItemDesc;
+import com.usian.pojo.TbItemParamItem;
 import com.usian.service.ItemService;
 import com.usian.utils.PageResult;
 import com.usian.utils.Result;
@@ -48,6 +50,17 @@ public class ItemController {
     public void deleteItemById(@RequestParam(defaultValue = "0") Long itemId){
 
         itemService.deleteItemById(itemId);
+    }
+
+
+    @RequestMapping("selectItemDescByItemId")
+    public TbItemDesc selectItemDescByItemId(Long itemId){
+        return itemService.selectItemDescByItemId(itemId);
+    }
+
+    @RequestMapping("selectTbItemParamItemByItemId")
+    public TbItemParamItem selectTbItemParamItemByItemId(@RequestParam Long itemId){
+        return itemService.selectTbItemParamItemByItemId(itemId);
     }
 
 }

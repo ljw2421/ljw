@@ -2,11 +2,14 @@ package com.usian.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.usian.config.RedisClient;
 import com.usian.mapper.*;
 import com.usian.pojo.*;
 import com.usian.utils.IDUtils;
 import com.usian.utils.PageResult;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -16,6 +19,19 @@ import java.util.Map;
 
 @Service
 public class ItemService {
+
+    @Value("${ITEM_INFO}")
+    private String ITEM_INFO;
+
+    @Value("${BASE}")
+    private String BASE;
+
+    @Value("${DESC}")
+    private String DESC;
+
+    @Value("${ITEM_INFO_EXPIRE}")
+    private Integer ITEM_INFO_EXPIRE;
+
     @Autowired
     private TbItemMapper itemMapper;
 
@@ -28,8 +44,30 @@ public class ItemService {
     @Autowired
     private TbItemCatMapper tbItemCatMapper;
 
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+
+    @Autowired
+    private RedisClient redisClient;
+
     public TbItem getById(Long itemId) {
-        return itemMapper.selectByPrimaryKey(itemId);
+        //查询缓存中是否存在
+        TbItem tbItem = (TbItem) redisClient.get(ITEM_INFO + ":" + itemId + ":" + BASE);
+        //存在直接返回
+        if (tbItem != null){
+            return tbItem;
+        }
+        //不存在则从数据库中查询
+        tbItem = itemMapper.selectByPrimaryKey(itemId);
+        if (tbItem != null){
+            //数据库中存在将数据保存至Redis中
+            redisClient.set(ITEM_INFO + ":" + itemId + ":" + BASE,tbItem);
+            return tbItem;
+        }
+        //数据库中不存在则将空串保存到Redis中并且设置过期时间
+        redisClient.set(ITEM_INFO + ":" + itemId + ":" + BASE,null);
+        redisClient.expire(ITEM_INFO + ":" + itemId + ":" + BASE,60);
+        return tbItem;
     }
 
     public PageResult selectTbItemAllByPage(Integer page, Integer rows) {
@@ -77,6 +115,9 @@ public class ItemService {
         tbItemParamItem.setUpdated(date);
         tbItemParamItem.setCreated(date);
         Integer i3 =tbItemParamItemMapper.insertSelective(tbItemParamItem);
+
+        //添加商品发布消息到mq
+        amqpTemplate.convertAndSend("item_exchage","item.add",itemId);
 
         return i1 + i2 + i3;
     }
@@ -141,6 +182,22 @@ public class ItemService {
     }
 
     public void deleteItemById(Long itemId) {
+
         itemMapper.deleteItemById(itemId);
+    }
+
+    public TbItemDesc selectItemDescByItemId(Long itemId) {
+        return tbItemDescMapper.selectByPrimaryKey(itemId);
+    }
+
+    public TbItemParamItem selectTbItemParamItemByItemId(Long itemId) {
+        TbItemParamItemExample example = new  TbItemParamItemExample();
+        TbItemParamItemExample.Criteria criteria = example.createCriteria();
+        criteria.andItemIdEqualTo(itemId);
+        List<TbItemParamItem> tbItemParamItems = tbItemParamItemMapper.selectByExampleWithBLOBs(example);
+        if (tbItemParamItems != null && tbItemParamItems.size() >0){
+            return tbItemParamItems.get(0);
+        }
+        return null;
     }
 }

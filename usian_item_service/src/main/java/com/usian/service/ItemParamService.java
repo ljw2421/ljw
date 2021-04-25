@@ -33,8 +33,6 @@ public class ItemParamService{
 
     public PageResult selectTbItemAllByPage(Integer page, Integer rows) {
         PageHelper.startPage(page,rows);
-        //TbItemParamExample tbItemParamExample = new TbItemParamExample();
-        //tbItemParamExample.setOrderByClause("updated Desc");
         List<TbItemParam> list = tbItemParamMapper.selectByExampleWithBLOBs(null);
         PageInfo<TbItemParam> pageInfo = new PageInfo<>(list);
         PageResult pageResult = new PageResult();
